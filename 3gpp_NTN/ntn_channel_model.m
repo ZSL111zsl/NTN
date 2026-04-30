@@ -174,8 +174,11 @@ else
 end
 
 % 应用净时延（信道时延 - TA 或完整时延）
-if net_delay > 0 && net_delay < n_samples
-    signal_out = [signal_out(:, net_delay+1:end), zeros(Nr, net_delay)];
+% 时延 = 信号迟到：接收端前 net_delay 个采样为零，末尾 net_delay 个采样丢失
+if net_delay >= n_samples
+    signal_out = zeros(Nr, n_samples);   % 完全错过 FFT 窗 → 接收到 0
+elseif net_delay > 0
+    signal_out = [zeros(Nr, net_delay), signal_out(:, 1:end-net_delay)];
 end
 
 % ---- 输出度量 ----
